@@ -1,0 +1,53 @@
+{
+  "columns": [
+    {
+      "id": "cXrtw5n8-FsB",
+      "title": "TODO"
+    },
+    {
+      "id": "w7DTqK1QQKTI",
+      "title": "Doing"
+    },
+    {
+      "id": "bfrqTfEydU38",
+      "title": "Waiting"
+    },
+    {
+      "id": "dfwMbxZS0EmM",
+      "title": "Done"
+    }
+  ],
+  "cards": [
+    {
+      "id": "7lR4Vd3EYixP",
+      "text": "布団から出る\n(:3っ)っ -=三[＿＿]"
+    },
+    {
+      "id": "TsXP5w9qLeM-",
+      "text": "顔を洗う👐"
+    },
+    {
+      "id": "rh022hj9zG58",
+      "text": "歯を磨く🦷"
+    },
+    {
+      "id": "3NRSLMq49xvT",
+      "text": "朝食をとる🍞"
+    },
+    {
+      "id": "-wkumDeruhSx",
+      "text": "布団に入る\n(:3[___]"
+    }
+  ],
+  "cardsOrder": {
+    "cXrtw5n8-FsB": "-wkumDeruhSx",
+    "w7DTqK1QQKTI": "w7DTqK1QQKTI",
+    "bfrqTfEydU38": "rh022hj9zG58",
+    "dfwMbxZS0EmM": "dfwMbxZS0EmM",
+    "7lR4Vd3EYixP": "bfrqTfEydU38",
+    "TsXP5w9qLeM-": "3NRSLMq49xvT",
+    "rh022hj9zG58": "7lR4Vd3EYixP",
+    "3NRSLMq49xvT": "cXrtw5n8-FsB",
+    "-wkumDeruhSx": "TsXP5w9qLeM-"
+  }
+}
