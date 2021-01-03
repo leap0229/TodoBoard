@@ -1,31 +1,48 @@
 import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
+import { useDispatch, useSelector } from 'react-redux';
+import { reorderPatch } from './util';
+import { api, ColumnID, CardID } from './api';
 import * as color from './color';
 import { CheckIcon as _CheckIcon, TrashIcon } from './icon';
 
-export const Card = ({ 
-  text,
-  onDragStart,
-  onDragEnd,
-  onDeleteClick
-}: { 
-  text?: string;
-  onDragStart?(): void;
-  onDragEnd?(): void;
-  onDeleteClick?(): void;
-}) => {
-  const [drag, setDrag] = useState(false);
+export const Card = ({ id }: { id: CardID }) => {
+  const dispatch = useDispatch();
+  const card = useSelector(state =>
+    state.columns?.flatMap(c => c.cards ?? []).find(c => c.id === id),
+  );
+  const drag = useSelector(state => state.draggingCardID === id);
+
+  const onDeleteClick = () => {
+    dispatch({
+      type: 'Card.SetDeletingCard',
+      payload: {
+        cardID: id,
+      },
+    });
+  };
+
+  if (!card) {
+    return null;
+  }
+
+  const { text } = card;
 
   return (
     <Container
       style={{ opacity: drag ? 0.5 : undefined }}
       onDragStart={() => {
-        onDragStart?.();
-        setDrag(true);
+        dispatch({
+          type: 'Card.StartDragging',
+          payload: {
+            cardID: id,
+          },
+        });
       }}
       onDragEnd={() => {
-        onDragEnd?.();
-        setDrag(false);
+        dispatch({
+          type: 'Card.EndDragging',
+        });
       }}
     >
       <CheckIcon />
@@ -97,18 +114,22 @@ const Link = styled.a.attrs({
 `;
 
 const DropArea = ({
+  targetID: toID,
   disabled,
-  onDrop,
   children,
   className,
   style,
 }: {
+  targetID: CardID | ColumnID;
   disabled?: boolean;
-  onDrop?(): void;
   children?: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
 }) => {
+  const dispatch = useDispatch();
+  const draggingCardID = useSelector(state => state.draggingCardID);
+  const cardsOrder = useSelector(state => state.cardsOrder);
+
   const [isTarget, setIsTarget] = useState(false);
   const visible = !disabled && isTarget;
 
@@ -131,9 +152,19 @@ const DropArea = ({
       }}
       onDrop={() => {
         if (disabled) return;
+        if (!draggingCardID || draggingCardID === toID) return;
+
+        dispatch({
+          type: 'Card.Drop',
+          payload: {
+            toID
+          }
+        });
+
+        const patch = reorderPatch(cardsOrder, draggingCardID, toID);
+        api('PATCH /v1/cardsOrder', patch);
 
         setIsTarget(false);
-        onDrop?.();
       }}
     >
       <DropAreaIndicator
@@ -149,12 +180,12 @@ const DropArea = ({
 };
 
 /**
-  * dragOver イベントが継続中かどうかのフラグを ref として返す
-  *
-  * timeout 経過後に自動でフラグが false になる
-  *
-  * @param timeout 自動でフラグを false にするまでの時間 (ms)
-  */
+ * dragOver イベントが継続中かどうかのフラグを ref として返す
+ *
+ * timeout 経過後に自動でフラグが false になる
+ *
+ * @param timeout 自動でフラグを false にするまでの時間 (ms)
+ */
 const useDragAutoLeave = (timeout: number = 100) => {
   const dragOver = useRef(false);
   const timer = useRef(setTimeout(() => {}, 0));
@@ -170,21 +201,21 @@ const useDragAutoLeave = (timeout: number = 100) => {
         dragOver.current = false;
         onDragLeave?.();
       }, timeout);
-    }
-  ] as const
+    },
+  ] as const;
 };
 
 const DropAreaContainer = styled.div`
-> :not(:first-child) {
-  margin-top: 8px;
-}
-`
+  > :not(:first-child) {
+    margin-top: 8px;
+  }
+`;
 
 const DropAreaIndicator = styled.div`
-height: 40px;
-border: dashed 3px ${color.Gray};
-border-radius: 6px;
-transition: all 50ms ease-out;
-`
+  height: 40px;
+  border: dashed 3px ${color.Gray};
+  border-radius: 6px;
+  transition: all 50ms ease-out;
+`;
 
 Card.DropArea = DropArea;

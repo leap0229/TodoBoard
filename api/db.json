@@ -35,19 +35,22 @@
       "text": "朝食をとる🍞"
     },
     {
-      "id": "-wkumDeruhSx",
-      "text": "布団に入る\n(:3[___]"
+      "id": "FZuG2pN6GuKy",
+      "text": "test\n"
+    },
+    {
+      "id": "JrloPCLy2VTN",
+      "text": "test2"
     }
   ],
   "cardsOrder": {
-    "cXrtw5n8-FsB": "-wkumDeruhSx",
-    "w7DTqK1QQKTI": "w7DTqK1QQKTI",
-    "bfrqTfEydU38": "rh022hj9zG58",
+    "cXrtw5n8-FsB": "JrloPCLy2VTN",
+    "7lR4Vd3EYixP": "w7DTqK1QQKTI",
+    "bfrqTfEydU38": "bfrqTfEydU38",
     "dfwMbxZS0EmM": "dfwMbxZS0EmM",
-    "7lR4Vd3EYixP": "bfrqTfEydU38",
-    "TsXP5w9qLeM-": "3NRSLMq49xvT",
     "rh022hj9zG58": "7lR4Vd3EYixP",
-    "3NRSLMq49xvT": "cXrtw5n8-FsB",
-    "-wkumDeruhSx": "TsXP5w9qLeM-"
+    "w7DTqK1QQKTI": "rh022hj9zG58",
+    "FZuG2pN6GuKy": "cXrtw5n8-FsB",
+    "JrloPCLy2VTN": "FZuG2pN6GuKy"
   }
 }

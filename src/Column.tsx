@@ -1,63 +1,51 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { useSelector, shallowEqual } from 'react-redux';
 import * as color from './color';
 import { Card } from './Card';
 import { PlusIcon } from './icon';
 import { InputForm as _InputForm } from './InputForm';
-import { CardID } from './api';
+import { ColumnID } from './api';
 
-export function Column({
-  title,
-  filterValue: rawFilterValue,
-  cards: rawCards,
-  onCardDragStart,
-  onCardDrop,
-  onCardDeleteClick,
-  text,
-  onTextChange,
-  onTextConfirm,
-  onTextCancel,
-}: {
-  title?: string;
-  filterValue?: string;
-  cards?: {
-    id: CardID;
-    text?: string;
-  }[];
-  onCardDragStart?(id: CardID): void;
-  onCardDrop?(entered: CardID | null): void;
-  onCardDeleteClick?(id: CardID): void;
-  text?: string;
-  onTextChange?(value: string): void;
-  onTextConfirm?(): void;
-  onTextCancel?(): void;
-}) {
-  const filterValue = rawFilterValue?.trim();
-  const keywords = filterValue?.toLowerCase().split(/\s+/g) ?? [];
-  const cards = rawCards?.filter(({ text }) => {
-    return keywords?.every(w => text?.toLowerCase().includes(w));
-  });
+export function Column({ id: columnID }: { id: ColumnID }) {
+  const { column, cards, filtered, totalCount } = useSelector(
+    state => {
+      const filterValue = state.filterValue.trim();
+      const filtered = Boolean(filterValue);
+      const keywords = filterValue.toLowerCase().split(/\s+/g);
 
-  const totalCount = rawCards?.length ?? -1;
+      const { title, cards: rawCards } =
+        state.columns?.find(c => c.id === columnID) ?? {};
+
+      const column = { title };
+      const cards = rawCards
+        ?.filter(({ text }) => {
+          return keywords?.every(w => text?.toLowerCase().includes(w));
+        })
+        .map(c => c.id);
+
+      const totalCount = rawCards?.length ?? -1;
+
+      return { column, cards, filtered, totalCount };
+    },
+    (left, right) => {
+      return Object.keys(left).every(key =>
+        shallowEqual(left[key], right[key]),
+      );
+    },
+  );
+
+  const draggingCardID = useSelector(state => state.draggingCardID);
 
   const [inputMode, setInputMode] = useState(false);
   const toggleInput = () => setInputMode(v => !v);
+  const cancelInput = () => setInputMode(false);
 
-  const confirmInput = () => {
-    onTextConfirm?.();
-  };
-  const cancelInput = () => {
-    setInputMode(false);
-    onTextCancel?.();
-  };
+  if (!column) {
+    return null;
+  }
 
-  const [draggingCardID, setDraggingCardID] = useState<CardID | undefined>(
-    undefined,
-  );
-  const handleCardDragStart = (id: CardID) => {
-    setDraggingCardID(id);
-    onCardDragStart?.(id);
-  };
+  const { title } = column;
 
   return (
     <Container>
@@ -68,49 +56,37 @@ export function Column({
         <AddButton onClick={toggleInput} />
       </Header>
 
-      {inputMode && (
-        <InputForm
-          value={text}
-          onChange={onTextChange}
-          onConfirm={confirmInput}
-          onCancel={cancelInput}
-        />
-      )}
+      {inputMode && <InputForm columnID={columnID} onCancel={cancelInput} />}
 
       {!cards ? (
         <Loading />
       ) : (
         <>
-          {filterValue && <ResultCount>{cards.length} results</ResultCount>}
+          {filtered && <ResultCount>{cards.length} results</ResultCount>}
 
           <VerticalScroll>
-            {cards.map(({ id, text }, i) => (
+            {cards.map((id, i) => (
               <Card.DropArea
                 key={id}
+                targetID={id}
                 disabled={
                   draggingCardID !== undefined &&
                   // 一個目の条件は、直前のdropareaを指す
                   // 二個目の条件は、直後のdropareaを指す
-                  (id === draggingCardID || cards[i - 1]?.id === draggingCardID)
+                  (id === draggingCardID || cards[i - 1] === draggingCardID)
                 }
-                onDrop={() => onCardDrop?.(id)}
               >
-                <Card
-                  text={text}
-                  onDragStart={() => handleCardDragStart(id)}
-                  onDragEnd={() => setDraggingCardID(undefined)}
-                  onDeleteClick={() => onCardDeleteClick?.(id)}
-                />
+                <Card id={id} />
               </Card.DropArea>
             ))}
 
             <Card.DropArea
+              targetID={columnID}
               style={{ height: '100%' }}
               disabled={
                 draggingCardID !== undefined &&
-                cards[cards.length - 1]?.id === draggingCardID
+                cards[cards.length - 1] === draggingCardID
               }
-              onDrop={() => onCardDrop?.(null)}
             />
           </VerticalScroll>
         </>
